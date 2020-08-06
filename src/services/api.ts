@@ -15,4 +15,4 @@ export default {
   queryPostList: '/posts',
 
   queryDashboard: '/dashboard',
-}
+};

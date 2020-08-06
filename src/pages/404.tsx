@@ -1,7 +1,7 @@
-import React from 'react'
-import { FrownOutlined } from '@ant-design/icons'
-import styles from './404.less'
-import { Page } from 'components'
+import React from 'react';
+import { FrownOutlined } from '@ant-design/icons';
+import styles from './404.less';
+import { Page } from 'components';
 
 const Error = () => (
   <Page inner>
@@ -10,6 +10,6 @@ const Error = () => (
       <h1>404 Not Found</h1>
     </div>
   </Page>
-)
+);
 
-export default Error
+export default Error;

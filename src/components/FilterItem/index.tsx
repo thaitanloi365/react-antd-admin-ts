@@ -1,11 +1,11 @@
-import React from 'react'
-import styles from './index.less'
+import React from 'react';
+import styles from './index.less';
 
 export interface FilterItemProps {
-  label: string
+  label: string;
 }
 const FilterItem: React.SFC<FilterItemProps> = ({ label = '', children }) => {
-  const labelArray = label.split('')
+  const labelArray = label.split('');
   return (
     <div className={styles.filterItem}>
       {labelArray.length > 0 && (
@@ -19,7 +19,7 @@ const FilterItem: React.SFC<FilterItemProps> = ({ label = '', children }) => {
       )}
       <div className={styles.item}>{children}</div>
     </div>
-  )
-}
+  );
+};
 
-export default FilterItem
+export default FilterItem;

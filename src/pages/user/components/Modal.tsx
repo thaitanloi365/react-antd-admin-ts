@@ -1,7 +1,7 @@
-import React, { PureComponent } from 'react'
-import { Form, Input, InputNumber, Radio, Modal } from 'antd'
+import React, { PureComponent } from 'react';
+import { Form, Input, InputNumber, Radio, Modal } from 'antd';
 
-const FormItem = Form.Item
+const FormItem = Form.Item;
 
 const formItemLayout = {
   labelCol: {
@@ -10,13 +10,13 @@ const formItemLayout = {
   wrapperCol: {
     span: 14,
   },
-}
+};
 
 class UserModal extends PureComponent {
-  formRef = React.createRef()
+  formRef = React.createRef();
 
   handleOk = () => {
-    const { item = {}, onOk } = this.props
+    const { item = {}, onOk } = this.props;
 
     this.formRef.current
       .validateFields()
@@ -24,17 +24,17 @@ class UserModal extends PureComponent {
         const data = {
           ...values,
           key: item.key,
-        }
-        data.address = data.address.join(' ')
-        onOk(data)
+        };
+        data.address = data.address.join(' ');
+        onOk(data);
       })
       .catch((errorInfo) => {
-        console.log(errorInfo)
-      })
-  }
+        console.log(errorInfo);
+      });
+  };
 
   render() {
-    const { item = {}, onOk, form, ...modalProps } = this.props
+    const { item = {}, onOk, form, ...modalProps } = this.props;
 
     return (
       <Modal {...modalProps} onOk={this.handleOk}>
@@ -47,31 +47,13 @@ class UserModal extends PureComponent {
           }}
           layout="horizontal"
         >
-          <FormItem
-            name="name"
-            rules={[{ required: true }]}
-            label="Name"
-            hasFeedback
-            {...formItemLayout}
-          >
+          <FormItem name="name" rules={[{ required: true }]} label="Name" hasFeedback {...formItemLayout}>
             <Input />
           </FormItem>
-          <FormItem
-            name="nickName"
-            rules={[{ required: true }]}
-            label="NickName"
-            hasFeedback
-            {...formItemLayout}
-          >
+          <FormItem name="nickName" rules={[{ required: true }]} label="NickName" hasFeedback {...formItemLayout}>
             <Input />
           </FormItem>
-          <FormItem
-            name="isMale"
-            rules={[{ required: true }]}
-            label="Gender"
-            hasFeedback
-            {...formItemLayout}
-          >
+          <FormItem name="isMale" rules={[{ required: true }]} label="Gender" hasFeedback {...formItemLayout}>
             <Radio.Group>
               <Radio value>Male</Radio>
               <Radio value={false}>Female</Radio>
@@ -112,8 +94,8 @@ class UserModal extends PureComponent {
           </FormItem>
         </Form>
       </Modal>
-    )
+    );
   }
 }
 
-export default UserModal
+export default UserModal;

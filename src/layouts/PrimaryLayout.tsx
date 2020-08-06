@@ -1,83 +1,79 @@
-import React, { PureComponent, Fragment } from 'react'
-import { withRouter } from 'umi'
-import { connect } from 'umi'
-import { MyLayout, GlobalFooter } from 'components'
-import { BackTop, Layout, Drawer } from 'antd'
-import { enquireScreen, unenquireScreen } from 'enquire-js'
-import { getLocale } from 'utils'
-import Error from '../pages/404'
-import styles from './PrimaryLayout.less'
-import store from 'store'
-import config from 'utils/config'
-import { pathToRegexp } from 'path-to-regexp'
+import React, { PureComponent, Fragment } from 'react';
+import { withRouter } from 'umi';
+import { connect } from 'umi';
+import { MyLayout, GlobalFooter } from 'components';
+import { BackTop, Layout, Drawer } from 'antd';
+import { enquireScreen, unenquireScreen } from 'enquire-js';
+import { getLocale } from 'utils';
+import Error from '../pages/404';
+import styles from './PrimaryLayout.less';
+import store from 'store';
+import config from 'utils/config';
+import { pathToRegexp } from 'path-to-regexp';
 
-const { Content } = Layout
-const { Header, Bread, Sider } = MyLayout
+const { Content } = Layout;
+const { Header, Bread, Sider } = MyLayout;
 
 @withRouter
 @connect(({ app, loading }) => ({ app, loading }))
 class PrimaryLayout extends PureComponent {
   state = {
     isMobile: false,
-  }
+  };
 
   componentDidMount() {
     this.enquireHandler = enquireScreen((mobile) => {
-      const { isMobile } = this.state
+      const { isMobile } = this.state;
       if (isMobile !== mobile) {
         this.setState({
           isMobile: mobile,
-        })
+        });
       }
-    })
+    });
   }
 
   componentWillUnmount() {
-    unenquireScreen(this.enquireHandler)
+    unenquireScreen(this.enquireHandler);
   }
 
   onCollapseChange = (collapsed) => {
     this.props.dispatch({
       type: 'app/handleCollapseChange',
       payload: collapsed,
-    })
-  }
+    });
+  };
 
   render() {
-    const { app, location, dispatch, children } = this.props
-    const { theme, collapsed, notifications } = app
-    const user = store.get('user') || {}
-    const permissions = store.get('permissions') || {}
-    const routeList = store.get('routeList') || []
-    const { isMobile } = this.state
-    const { onCollapseChange } = this
+    const { app, location, dispatch, children } = this.props;
+    const { theme, collapsed, notifications } = app;
+    const user = store.get('user') || {};
+    const permissions = store.get('permissions') || {};
+    const routeList = store.get('routeList') || [];
+    const { isMobile } = this.state;
+    const { onCollapseChange } = this;
 
     // Localized route name.
 
-    const lang = getLocale()
+    const lang = getLocale();
     const newRouteList =
       lang !== 'en'
         ? routeList.map((item) => {
-            const { name, ...other } = item
+            const { name, ...other } = item;
             return {
               ...other,
               name: (item[lang] || {}).name || name,
-            }
+            };
           })
-        : routeList
+        : routeList;
 
     // Find a route that matches the pathname.
-    const currentRoute = newRouteList.find(
-      (_) => _.route && pathToRegexp(_.route).exec(location.pathname)
-    )
+    const currentRoute = newRouteList.find((_) => _.route && pathToRegexp(_.route).exec(location.pathname));
 
     // Query whether you have permission to enter this page
-    const hasPermission = currentRoute
-      ? permissions.visit.includes(currentRoute.id)
-      : false
+    const hasPermission = currentRoute ? permissions.visit.includes(currentRoute.id) : false;
 
     // MenuParentId is equal to -1 is not a available menu.
-    const menus = newRouteList.filter((_) => _.menuParentId !== '-1')
+    const menus = newRouteList.filter((_) => _.menuParentId !== '-1');
 
     const headerProps = {
       menus,
@@ -88,12 +84,12 @@ class PrimaryLayout extends PureComponent {
       username: user.username,
       fixed: config.fixedHeader,
       onAllNotificationsRead() {
-        dispatch({ type: 'app/allNotificationsRead' })
+        dispatch({ type: 'app/allNotificationsRead' });
       },
       onSignOut() {
-        dispatch({ type: 'app/signOut' })
+        dispatch({ type: 'app/signOut' });
       },
-    }
+    };
 
     const siderProps = {
       theme,
@@ -105,9 +101,9 @@ class PrimaryLayout extends PureComponent {
         dispatch({
           type: 'app/handleThemeChange',
           payload: theme,
-        })
+        });
       },
-    }
+    };
 
     return (
       <Fragment>
@@ -130,29 +126,19 @@ class PrimaryLayout extends PureComponent {
           ) : (
             <Sider {...siderProps} />
           )}
-          <div
-            className={styles.container}
-            style={{ paddingTop: config.fixedHeader ? 72 : 0 }}
-            id="primaryLayout"
-          >
+          <div className={styles.container} style={{ paddingTop: config.fixedHeader ? 72 : 0 }} id="primaryLayout">
             <Header {...headerProps} />
             <Content className={styles.content}>
               <Bread routeList={newRouteList} />
               {hasPermission ? children : <Error />}
             </Content>
-            <BackTop
-              className={styles.backTop}
-              target={() => document.querySelector('#primaryLayout')}
-            />
-            <GlobalFooter
-              className={styles.footer}
-              copyright={config.copyright}
-            />
+            <BackTop className={styles.backTop} target={() => document.querySelector('#primaryLayout')} />
+            <GlobalFooter className={styles.footer} copyright={config.copyright} />
           </div>
         </Layout>
       </Fragment>
-    )
+    );
   }
 }
 
-export default PrimaryLayout
+export default PrimaryLayout;

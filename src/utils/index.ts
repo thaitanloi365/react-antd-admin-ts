@@ -27,7 +27,7 @@ export function queryArray(array: Array<any>, key: string, value: any) {
  * @return  {array}    Return a tree-structured array.
  */
 export function arrayToTree(array: Array<any>, id = 'id', parentId = 'pid', children = 'children') {
-  let result: Array<any> = [];
+  const result: Array<any> = [];
   const hash = {};
   const data = cloneDeep(array);
 

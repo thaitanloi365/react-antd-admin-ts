@@ -1,19 +1,18 @@
-import React, { PureComponent } from 'react'
-import PropTypes from 'prop-types'
-import { history, connect } from 'umi'
-import { Row, Col, Button, Popconfirm } from 'antd'
-import { Page } from 'components'
-import { stringify } from 'qs'
-import List from './components/List'
-import Filter from './components/Filter'
-import Modal from './components/Modal'
+import React, { PureComponent } from 'react';
+import PropTypes from 'prop-types';
+import { history, connect } from 'umi';
+import { Row, Col, Button, Popconfirm } from 'antd';
+import { Page } from 'components';
+import { stringify } from 'qs';
+import List from './components/List';
+import Filter from './components/Filter';
+import Modal from './components/Modal';
 
-@withI18n()
 @connect(({ user, loading }) => ({ user, loading }))
 class User extends PureComponent {
   handleRefresh = (newQuery) => {
-    const { location } = this.props
-    const { query, pathname } = location
+    const { location } = this.props;
+    const { query, pathname } = location;
 
     history.push({
       pathname,
@@ -24,12 +23,12 @@ class User extends PureComponent {
         },
         { arrayFormat: 'repeat' }
       ),
-    })
-  }
+    });
+  };
 
   handleDeleteItems = () => {
-    const { dispatch, user } = this.props
-    const { list, pagination, selectedRowKeys } = user
+    const { dispatch, user } = this.props;
+    const { list, pagination, selectedRowKeys } = user;
 
     dispatch({
       type: 'user/multiDelete',
@@ -42,13 +41,13 @@ class User extends PureComponent {
           list.length === selectedRowKeys.length && pagination.current > 1
             ? pagination.current - 1
             : pagination.current,
-      })
-    })
-  }
+      });
+    });
+  };
 
   get modalProps() {
-    const { dispatch, user, loading, i18n } = this.props
-    const { currentItem, modalVisible, modalType } = user
+    const { dispatch, user, loading, i18n } = this.props;
+    const { currentItem, modalVisible, modalType } = user;
 
     return {
       i18n,
@@ -57,29 +56,27 @@ class User extends PureComponent {
       destroyOnClose: true,
       maskClosable: false,
       confirmLoading: loading.effects[`user/${modalType}`],
-      title: `${
-        modalType === 'create' ? i18n.t`Create User` : i18n.t`Update User`
-      }`,
+      title: `${modalType === 'create' ? i18n.t`Create User` : i18n.t`Update User`}`,
       centered: true,
       onOk: (data) => {
         dispatch({
           type: `user/${modalType}`,
           payload: data,
         }).then(() => {
-          this.handleRefresh()
-        })
+          this.handleRefresh();
+        });
       },
       onCancel() {
         dispatch({
           type: 'user/hideModal',
-        })
+        });
       },
-    }
+    };
   }
 
   get listProps() {
-    const { dispatch, user, loading } = this.props
-    const { list, pagination, selectedRowKeys } = user
+    const { dispatch, user, loading } = this.props;
+    const { list, pagination, selectedRowKeys } = user;
 
     return {
       dataSource: list,
@@ -89,7 +86,7 @@ class User extends PureComponent {
         this.handleRefresh({
           page: page.current,
           pageSize: page.pageSize,
-        })
+        });
       },
       onDeleteItem: (id) => {
         dispatch({
@@ -97,12 +94,9 @@ class User extends PureComponent {
           payload: id,
         }).then(() => {
           this.handleRefresh({
-            page:
-              list.length === 1 && pagination.current > 1
-                ? pagination.current - 1
-                : pagination.current,
-          })
-        })
+            page: list.length === 1 && pagination.current > 1 ? pagination.current - 1 : pagination.current,
+          });
+        });
       },
       onEditItem(item) {
         dispatch({
@@ -111,7 +105,7 @@ class User extends PureComponent {
             modalType: 'update',
             currentItem: item,
           },
-        })
+        });
       },
       rowSelection: {
         selectedRowKeys,
@@ -121,15 +115,15 @@ class User extends PureComponent {
             payload: {
               selectedRowKeys: keys,
             },
-          })
+          });
         },
       },
-    }
+    };
   }
 
   get filterProps() {
-    const { location, dispatch, i18n } = this.props
-    const { query } = location
+    const { location, dispatch, i18n } = this.props;
+    const { query } = location;
 
     return {
       i18n,
@@ -139,7 +133,7 @@ class User extends PureComponent {
       onFilterChange: (value) => {
         this.handleRefresh({
           ...value,
-        })
+        });
       },
       onAdd() {
         dispatch({
@@ -147,14 +141,14 @@ class User extends PureComponent {
           payload: {
             modalType: 'create',
           },
-        })
+        });
       },
-    }
+    };
   }
 
   render() {
-    const { user } = this.props
-    const { selectedRowKeys } = user
+    const { user } = this.props;
+    const { selectedRowKeys } = user;
 
     return (
       <Page inner>
@@ -163,11 +157,7 @@ class User extends PureComponent {
           <Row style={{ marginBottom: 24, textAlign: 'right', fontSize: 13 }}>
             <Col>
               {`Selected ${selectedRowKeys.length} items `}
-              <Popconfirm
-                title="Are you sure delete these items?"
-                placement="left"
-                onConfirm={this.handleDeleteItems}
-              >
+              <Popconfirm title="Are you sure delete these items?" placement="left" onConfirm={this.handleDeleteItems}>
                 <Button type="primary" style={{ marginLeft: 8 }}>
                   Remove
                 </Button>
@@ -178,7 +168,7 @@ class User extends PureComponent {
         <List {...this.listProps} />
         <Modal {...this.modalProps} />
       </Page>
-    )
+    );
   }
 }
 
@@ -187,6 +177,6 @@ User.propTypes = {
   location: PropTypes.object,
   dispatch: PropTypes.func,
   loading: PropTypes.object,
-}
+};
 
-export default User
+export default User;

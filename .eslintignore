@@ -5,3 +5,5 @@ src/routes/chart/highCharts/mapdata
 src/locales/_build/
 src/locales/**/*.js
 docs/**/*.js
+node_modules
+dist

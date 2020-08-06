@@ -1,39 +1,35 @@
-import React, { PureComponent, Fragment } from 'react'
-import { Icon as LegacyIcon } from '@ant-design/compatible'
-import { Menu } from 'antd'
-import { NavLink, withRouter } from 'umi'
-import { arrayToTree, queryAncestors } from 'utils'
-import { pathToRegexp } from 'path-to-regexp'
-import store from 'store'
+import React, { PureComponent, Fragment } from 'react';
+import { Icon as LegacyIcon } from '@ant-design/compatible';
+import { Menu } from 'antd';
+import { NavLink, withRouter } from 'umi';
+import { arrayToTree, queryAncestors } from 'utils';
+import { pathToRegexp } from 'path-to-regexp';
+import store from 'store';
 
-const { SubMenu } = Menu
+const { SubMenu } = Menu;
 
 @withRouter
 class SiderMenu extends PureComponent {
   state = {
     openKeys: store.get('openKeys') || [],
-  }
+  };
 
   onOpenChange = (openKeys) => {
-    const { menus } = this.props
-    const rootSubmenuKeys = menus
-      .filter((_) => !_.menuParentId)
-      .map((_) => _.id)
+    const { menus } = this.props;
+    const rootSubmenuKeys = menus.filter((_) => !_.menuParentId).map((_) => _.id);
 
-    const latestOpenKey = openKeys.find(
-      (key) => this.state.openKeys.indexOf(key) === -1
-    )
+    const latestOpenKey = openKeys.find((key) => this.state.openKeys.indexOf(key) === -1);
 
-    let newOpenKeys = openKeys
+    let newOpenKeys = openKeys;
     if (rootSubmenuKeys.indexOf(latestOpenKey) !== -1) {
-      newOpenKeys = latestOpenKey ? [latestOpenKey] : []
+      newOpenKeys = latestOpenKey ? [latestOpenKey] : [];
     }
 
     this.setState({
       openKeys: newOpenKeys,
-    })
-    store.set('openKeys', newOpenKeys)
-  }
+    });
+    store.set('openKeys', newOpenKeys);
+  };
 
   generateMenus = (data) => {
     return data.map((item) => {
@@ -50,7 +46,7 @@ class SiderMenu extends PureComponent {
           >
             {this.generateMenus(item.children)}
           </SubMenu>
-        )
+        );
       }
       return (
         <Menu.Item key={item.id}>
@@ -59,38 +55,27 @@ class SiderMenu extends PureComponent {
             <span>{item.name}</span>
           </NavLink>
         </Menu.Item>
-      )
-    })
-  }
+      );
+    });
+  };
 
   render() {
-    const {
-      collapsed,
-      theme,
-      menus,
-      location,
-      isMobile,
-      onCollapseChange,
-    } = this.props
+    const { collapsed, theme, menus, location, isMobile, onCollapseChange } = this.props;
 
     // Generating tree-structured data for menu content.
-    const menuTree = arrayToTree(menus, 'id', 'menuParentId')
+    const menuTree = arrayToTree(menus, 'id', 'menuParentId');
 
     // Find a menu that matches the pathname.
-    const currentMenu = menus.find(
-      (_) => _.route && pathToRegexp(_.route).exec(location.pathname)
-    )
+    const currentMenu = menus.find((_) => _.route && pathToRegexp(_.route).exec(location.pathname));
 
     // Find the key that should be selected according to the current menu.
-    const selectedKeys = currentMenu
-      ? queryAncestors(menus, currentMenu, 'menuParentId').map((_) => _.id)
-      : []
+    const selectedKeys = currentMenu ? queryAncestors(menus, currentMenu, 'menuParentId').map((_) => _.id) : [];
 
     const menuProps = collapsed
       ? {}
       : {
           openKeys: this.state.openKeys,
-        }
+        };
 
     return (
       <Menu
@@ -101,7 +86,7 @@ class SiderMenu extends PureComponent {
         onClick={
           isMobile
             ? () => {
-                onCollapseChange(true)
+                onCollapseChange(true);
               }
             : undefined
         }
@@ -109,8 +94,8 @@ class SiderMenu extends PureComponent {
       >
         {this.generateMenus(menuTree)}
       </Menu>
-    )
+    );
   }
 }
 
-export default SiderMenu
+export default SiderMenu;

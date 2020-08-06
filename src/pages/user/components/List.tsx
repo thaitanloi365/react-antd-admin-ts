@@ -1,34 +1,33 @@
-import React, { PureComponent } from 'react'
-import { Table, Modal, Avatar } from 'antd'
-import { DropOption } from 'components'
-import { Link } from 'umi'
-import styles from './List.less'
+import React, { PureComponent } from 'react';
+import { Table, Modal, Avatar } from 'antd';
+import { DropOption } from 'components';
+import { Link } from 'umi';
+import styles from './List.less';
 
-const { confirm } = Modal
+const { confirm } = Modal;
 
-@withI18n()
 class List extends PureComponent {
   handleMenuClick = (record, e) => {
-    const { onDeleteItem, onEditItem, i18n } = this.props
+    const { onDeleteItem, onEditItem, i18n } = this.props;
 
     if (e.key === '1') {
-      onEditItem(record)
+      onEditItem(record);
     } else if (e.key === '2') {
       confirm({
         title: i18n.t`Are you sure delete this record?`,
         onOk() {
-          onDeleteItem(record.id)
+          onDeleteItem(record.id);
         },
-      })
+      });
     }
-  }
+  };
 
   render() {
-    const { onDeleteItem, onEditItem, i18n, ...tableProps } = this.props
+    const { onDeleteItem, onEditItem, i18n, ...tableProps } = this.props;
 
     const columns = [
       {
-        title: <Trans>Avatar</Trans>,
+        title: 'Avatar',
         dataIndex: 'avatar',
         key: 'avatar',
         width: 72,
@@ -36,49 +35,49 @@ class List extends PureComponent {
         render: (text) => <Avatar style={{ marginLeft: 8 }} src={text} />,
       },
       {
-        title: <Trans>Name</Trans>,
+        title: 'Name',
         dataIndex: 'name',
         key: 'name',
         render: (text, record) => <Link to={`user/${record.id}`}>{text}</Link>,
       },
       {
-        title: <Trans>NickName</Trans>,
+        title: 'NickName',
         dataIndex: 'nickName',
         key: 'nickName',
       },
       {
-        title: <Trans>Age</Trans>,
+        title: 'Age',
         dataIndex: 'age',
         key: 'age',
       },
       {
-        title: <Trans>Gender</Trans>,
+        title: 'Gender',
         dataIndex: 'isMale',
         key: 'isMale',
         render: (text) => <span>{text ? 'Male' : 'Female'}</span>,
       },
       {
-        title: <Trans>Phone</Trans>,
+        title: 'Phone',
         dataIndex: 'phone',
         key: 'phone',
       },
       {
-        title: <Trans>Email</Trans>,
+        title: 'Email',
         dataIndex: 'email',
         key: 'email',
       },
       {
-        title: <Trans>Address</Trans>,
+        title: 'Address',
         dataIndex: 'address',
         key: 'address',
       },
       {
-        title: <Trans>CreateTime</Trans>,
+        title: 'CreateTime',
         dataIndex: 'createTime',
         key: 'createTime',
       },
       {
-        title: <Trans>Operation</Trans>,
+        title: 'Operation',
         key: 'operation',
         fixed: 'right',
         render: (text, record) => {
@@ -90,10 +89,10 @@ class List extends PureComponent {
                 { key: '2', name: i18n.t`Delete` },
               ]}
             />
-          )
+          );
         },
       },
-    ]
+    ];
 
     return (
       <Table
@@ -109,8 +108,8 @@ class List extends PureComponent {
         simple
         rowKey={(record) => record.id}
       />
-    )
+    );
   }
 }
 
-export default List
+export default List;
