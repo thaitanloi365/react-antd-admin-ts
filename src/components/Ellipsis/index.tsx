@@ -9,7 +9,7 @@ export type EllipsisTooltipProps = TooltipProps & {
   overlayStyle?: undefined;
 };
 
-export interface EllipsisProps {
+export interface IEllipsisProps {
   tooltip?: boolean | EllipsisTooltipProps;
   length?: number;
   lines?: number;
@@ -50,7 +50,7 @@ export const cutStrByFullLength = (str = '', maxLength: number) => {
   }, '');
 };
 
-const getTooltip = ({ tooltip, overlayStyle, title, children }) => {
+const getTooltip = ({ tooltip, overlayStyle, title, children }: any) => {
   if (tooltip) {
     const props = tooltip === true ? { overlayStyle, title } : { ...tooltip, overlayStyle, title };
     return <Tooltip {...props}>{children}</Tooltip>;
@@ -58,6 +58,7 @@ const getTooltip = ({ tooltip, overlayStyle, title, children }) => {
   return children;
 };
 
+// @ts-ignore
 const EllipsisText = ({ text, length, tooltip, fullWidthRecognition, ...other }) => {
   if (typeof text !== 'string') {
     throw new Error('Ellipsis children must be string.');
@@ -88,7 +89,13 @@ const EllipsisText = ({ text, length, tooltip, fullWidthRecognition, ...other })
   });
 };
 
-export default class Ellipsis extends Component {
+export default class Ellipsis extends Component<IEllipsisProps> {
+  content: any;
+  node: any;
+  shadowChildren: any;
+  shadow: any;
+  root: any;
+
   state = {
     text: '',
     targetCount: 0,
@@ -100,7 +107,7 @@ export default class Ellipsis extends Component {
     }
   }
 
-  componentDidUpdate(perProps) {
+  componentDidUpdate(perProps: IEllipsisProps) {
     const { lines } = this.props;
     if (lines !== perProps.lines) {
       this.computeLine();
@@ -113,7 +120,7 @@ export default class Ellipsis extends Component {
       const text = this.shadowChildren.innerText || this.shadowChildren.textContent;
       const lineHeight = parseInt(getComputedStyle(this.root).lineHeight, 10);
       const targetHeight = lines * lineHeight;
-      this.content.style.height = `${targetHeight}px`;
+      this.context.style.height = `${targetHeight}px`;
       const totalHeight = this.shadowChildren.offsetHeight;
       const shadowNode = this.shadow.firstChild;
 
@@ -138,6 +145,7 @@ export default class Ellipsis extends Component {
     }
   };
 
+  // @ts-ignore
   bisection = (th, m, b, e, text, shadowNode) => {
     const suffix = '...';
     let mid = m;

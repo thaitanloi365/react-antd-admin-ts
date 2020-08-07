@@ -1,26 +1,43 @@
-/* global window */
-
+import store from 'store';
+import config from 'utils/config';
 import { history } from 'umi';
 import { stringify } from 'qs';
-import store from 'store';
-import { pathToRegexp } from 'path-to-regexp';
-import { ROLE_TYPE } from 'utils/constant';
-import { queryLayout } from 'utils';
+import { IConnectState, IReducer, ITheme, ISubscription, IEffect, IModel } from 'types';
+import { queryLayout, parseFromUrl, pathMatchRegexp } from 'utils';
+import { IMenuItem, INotificationItem } from 'types/app';
 import { CANCEL_REQUEST_MESSAGE } from 'utils/constant';
-import api from 'api';
-import config from 'config';
 
-const { queryRouteList, logoutUser, queryUserInfo } = api;
+export interface IAppModelState {
+  routeList: IMenuItem[];
+  locationPathname: string;
+  locationQuery: any;
+  theme: ITheme;
+  collapsed: boolean;
+  notifications: INotificationItem[];
+}
 
-const goDashboard = () => {
-  if (pathToRegexp(['/', '/login']).exec(window.location.pathname)) {
-    history.push({
-      pathname: '/dashboard',
-    });
-  }
-};
+export interface IAppModelType extends IModel<IAppModelState> {
+  namespace: 'app';
+  reducers: {
+    updateState: IReducer<IAppModelState>;
+    handleThemeChange: IReducer<IAppModelState>;
+    handleCollapseChange: IReducer<IAppModelState>;
+    allNotificationsRead: IReducer<IAppModelState>;
+  };
 
-export default {
+  subscriptions: {
+    setup: ISubscription;
+    setupHistory: ISubscription;
+    setupRequestCancel: ISubscription;
+  };
+  effects: {
+    sessionTimeout: IEffect;
+    query: IEffect;
+    signOut: IEffect;
+  };
+}
+
+const AppModel: IAppModelType = {
   namespace: 'app',
   state: {
     routeList: [
@@ -28,8 +45,7 @@ export default {
         id: '1',
         icon: 'laptop',
         name: 'Dashboard',
-        zhName: '仪表盘',
-        router: '/dashboard',
+        route: '/dashboard',
       },
     ],
     locationPathname: '',
@@ -57,6 +73,7 @@ export default {
           type: 'updateState',
           payload: {
             locationPathname: location.pathname,
+            // @ts-ignore
             locationQuery: location.query,
           },
         });
@@ -65,8 +82,10 @@ export default {
 
     setupRequestCancel({ history }) {
       history.listen(() => {
+        // @ts-ignore
         const { cancelRequest = new Map() } = window;
 
+        // @ts-ignore
         cancelRequest.forEach((value, key) => {
           if (value.pathname !== window.location.pathname) {
             value.cancel(CANCEL_REQUEST_MESSAGE);
@@ -78,56 +97,61 @@ export default {
   },
   effects: {
     *query({ payload }, { call, put, select }) {
-      // store isInit to prevent query trigger by refresh
-      const isInit = store.get('isInit');
-      if (isInit) {
-        goDashboard();
+      const token = store.get('token', '');
+      const { locationPathname } = yield select((state: IConnectState) => state.app);
+      const layout = queryLayout(config.layouts, window.location.pathname);
+
+      if (layout !== 'public') {
+        if (token === '') {
+          history.push({
+            pathname: '/login',
+            search: stringify({
+              from: locationPathname === '' ? location.pathname : locationPathname,
+            }),
+          });
+          return;
+        }
+        var value = parseFromUrl(location?.search);
+        if (value?.from) {
+          history.push(value?.from);
+          return;
+        }
+
+        if (pathMatchRegexp('/', location.pathname)) {
+          history.push('/dashboard');
+          return;
+        }
         return;
       }
-      const { locationPathname } = yield select((_) => _.app);
-      const { success, user } = yield call(queryUserInfo, payload);
-      if (success && user) {
-        const { list } = yield call(queryRouteList);
-        const { permissions } = user;
-        let routeList = list;
-        if (permissions.role === ROLE_TYPE.ADMIN || permissions.role === ROLE_TYPE.DEVELOPER) {
-          permissions.visit = list.map((item) => item.id);
-        } else {
-          routeList = list.filter((item) => {
-            const cases = [
-              permissions.visit.includes(item.id),
-              item.mpid ? permissions.visit.includes(item.mpid) || item.mpid === '-1' : true,
-              item.bpid ? permissions.visit.includes(item.bpid) : true,
-            ];
-            return cases.every((_) => _);
-          });
-        }
-        store.set('routeList', routeList);
-        store.set('permissions', permissions);
-        store.set('user', user);
-        store.set('isInit', true);
-        goDashboard();
-      } else if (queryLayout(config.layouts, locationPathname) !== 'public') {
-        history.push({
-          pathname: '/login',
-          search: stringify({
-            from: locationPathname,
-          }),
-        });
-      }
+      history.push({
+        pathname: '/login',
+        search: stringify({
+          from: locationPathname === '' ? location.pathname : locationPathname,
+        }),
+      });
+      return;
     },
 
-    *signOut({ payload }, { call, put }) {
-      const data = yield call(logoutUser);
-      if (data.success) {
-        store.set('routeList', []);
-        store.set('permissions', { visit: [] });
-        store.set('user', {});
-        store.set('isInit', false);
-        yield put({ type: 'query' });
-      } else {
-        throw data;
-      }
+    *signOut({ payload }, { call, select }) {
+      const { locationPathname } = yield select((state: IConnectState) => state.app);
+      store.clearAll();
+      history.push({
+        pathname: '/login',
+        search: stringify({
+          from: locationPathname === '' ? location.pathname : locationPathname,
+        }),
+      });
+    },
+
+    *sessionTimeout({ payload }, { call, select }) {
+      const { locationPathname } = yield select((state: IConnectState) => state.app);
+      store.clearAll();
+      history.push({
+        pathname: '/login',
+        search: stringify({
+          from: locationPathname === '' ? location.pathname : locationPathname,
+        }),
+      });
     },
   },
   reducers: {
@@ -141,15 +165,20 @@ export default {
     handleThemeChange(state, { payload }) {
       store.set('theme', payload);
       state.theme = payload;
+      return state;
     },
 
     handleCollapseChange(state, { payload }) {
       store.set('collapsed', payload);
       state.collapsed = payload;
+      return state;
     },
 
     allNotificationsRead(state) {
       state.notifications = [];
+      return state;
     },
   },
 };
+
+export default AppModel;

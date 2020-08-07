@@ -8,6 +8,8 @@ import { withRouter } from 'umi';
 import PublicLayout from './PublicLayout';
 import PrimaryLayout from './PrimaryLayout';
 import './BaseLayout.less';
+import config from 'utils/config';
+import { IConnectState } from 'types';
 
 const LayoutMap = {
   primary: PrimaryLayout,
@@ -15,8 +17,8 @@ const LayoutMap = {
 };
 
 @withRouter
-@connect(({ loading }) => ({ loading }))
-class BaseLayout extends PureComponent {
+@connect(({ loading }: IConnectState) => ({ loading }))
+class BaseLayout extends PureComponent<IConnectState> {
   previousPath = '';
 
   render() {

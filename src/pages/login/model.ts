@@ -1,37 +1,41 @@
+import store from 'store';
+import { IEffect, IModel } from 'types';
 import { history } from 'umi';
-const { pathToRegexp } = require('path-to-regexp');
-import api from 'api';
+import { parseFromUrl } from 'utils';
+import APIFunction from 'services';
 
-const { loginUser } = api;
+export interface ILoginModelState {}
+export interface ILoginModelType extends IModel<ILoginModelState> {
+  effects: {
+    login: IEffect;
+  };
+}
 
-export default {
+const Model: ILoginModelType = {
   namespace: 'login',
 
   state: {},
-  // subscriptions: {
-  //   setup({ dispatch, history }) {
-  //     history.listen(location => {
-  //       if (pathToRegexp('/login').exec(location.pathname)) {
-  //       }
-  //     })
-  //   },
-  // },
+
   effects: {
     *login({ payload }, { put, call, select }) {
-      const data = yield call(loginUser, payload);
-      const { locationQuery } = yield select((_) => _.app);
-      if (data.success) {
-        const { from } = locationQuery;
-        yield put({ type: 'app/query' });
-        if (!pathToRegexp('/login').exec(from)) {
-          if (['', '/'].includes(from)) history.push('/dashboard');
-          else history.push(from);
-        } else {
-          history.push('/dashboard');
+      const { success, data } = yield call(APIFunction.login, payload);
+      if (success && data) {
+        store.set('token', data.token);
+        store.set('user', data.user);
+
+        var value = parseFromUrl(location?.search);
+        console.log(value?.from);
+        if (value?.from && value.from != 'login') {
+          history.push(value?.from);
+          return;
         }
+
+        history.push('/dashboard');
       } else {
         throw data;
       }
     },
   },
 };
+
+export default Model;

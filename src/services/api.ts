@@ -1,11 +1,8 @@
-export default {
-  queryRouteList: '/routes',
+const api = {
+  logout: 'DELETE /user/logout',
+  login: 'POST /user/login',
 
-  queryUserInfo: '/user',
-  logoutUser: '/user/logout',
-  loginUser: 'POST /user/login',
-
-  queryUser: '/user/:id',
+  getUser: '/user/:id',
   queryUserList: '/users',
   updateUser: 'Patch /user/:id',
   createUser: 'POST /user',
@@ -16,3 +13,4 @@ export default {
 
   queryDashboard: '/dashboard',
 };
+export default api;

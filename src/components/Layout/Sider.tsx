@@ -4,10 +4,20 @@ import { BulbOutlined } from '@ant-design/icons';
 import ScrollBar from '../ScrollBar';
 import SiderMenu from './Menu';
 import styles from './Sider.less';
+import config from 'utils/config';
 
-class Sider extends PureComponent {
+export interface ISiderProps {
+  menus: any[];
+  theme: 'light' | 'dark';
+  isMobile: boolean;
+  collapsed: boolean;
+  onThemeChange: (theme: 'light' | 'dark') => void;
+  onCollapseChange: (collapsed: boolean) => void;
+}
+
+class Sider extends PureComponent<ISiderProps> {
   render() {
-    const { i18n, menus, theme, isMobile, collapsed, onThemeChange, onCollapseChange } = this.props;
+    const { menus, theme, isMobile, collapsed, onThemeChange, onCollapseChange } = this.props;
 
     return (
       <Layout.Sider
@@ -52,8 +62,8 @@ class Sider extends PureComponent {
             <Switch
               onChange={onThemeChange.bind(this, theme === 'dark' ? 'light' : 'dark')}
               defaultChecked={theme === 'dark'}
-              checkedChildren={i18n.t`Dark`}
-              unCheckedChildren={i18n.t`Light`}
+              checkedChildren="Dark"
+              unCheckedChildren="Light"
             />
           </div>
         )}

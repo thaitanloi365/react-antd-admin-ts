@@ -5,16 +5,25 @@ import { NavLink, withRouter } from 'umi';
 import { arrayToTree, queryAncestors } from 'utils';
 import { pathToRegexp } from 'path-to-regexp';
 import store from 'store';
+import { RouteComponentProps } from 'types/umi';
 
 const { SubMenu } = Menu;
 
+interface ISiderMenuProps extends RouteComponentProps {
+  menus: any[];
+  theme: 'light' | 'dark';
+  isMobile: boolean;
+  onCollapseChange: (collapse: boolean) => void;
+  collapsed: boolean;
+}
+
 @withRouter
-class SiderMenu extends PureComponent {
+class SiderMenu extends PureComponent<ISiderMenuProps> {
   state = {
     openKeys: store.get('openKeys') || [],
   };
 
-  onOpenChange = (openKeys) => {
+  onOpenChange = (openKeys: Array<any>) => {
     const { menus } = this.props;
     const rootSubmenuKeys = menus.filter((_) => !_.menuParentId).map((_) => _.id);
 
@@ -31,7 +40,7 @@ class SiderMenu extends PureComponent {
     store.set('openKeys', newOpenKeys);
   };
 
-  generateMenus = (data) => {
+  generateMenus = (data: Array<any>) => {
     return data.map((item) => {
       if (item.children) {
         return (

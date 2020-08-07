@@ -3,12 +3,18 @@ import { Breadcrumb } from 'antd';
 import { Link, withRouter } from 'umi';
 import { Icon as LegacyIcon } from '@ant-design/compatible';
 import { queryAncestors } from 'utils';
-import styles from './Bread.less';
 import { pathToRegexp } from 'path-to-regexp';
+import { IMenus } from 'types/app';
+import { RouteComponentProps } from 'types';
+import styles from './Bread.less';
+
+interface IBreadProps extends Partial<RouteComponentProps> {
+  routeList: IMenus;
+}
 
 @withRouter
-class Bread extends PureComponent {
-  generateBreadcrumbs = (paths) => {
+class Bread extends PureComponent<IBreadProps> {
+  generateBreadcrumbs = (paths: IMenus) => {
     return paths.map((item, key) => {
       const content = item && (
         <Fragment>
@@ -27,7 +33,7 @@ class Bread extends PureComponent {
     });
   };
   render() {
-    const { routeList, location, i18n } = this.props;
+    const { routeList, location } = this.props;
 
     // Find a route that matches the pathname.
     const currentRoute = routeList.find((_) => _.route && pathToRegexp(_.route).exec(location.pathname));
@@ -39,7 +45,7 @@ class Bread extends PureComponent {
           routeList[0],
           {
             id: 404,
-            name: i18n.t`Not Found`,
+            name: 'Not Found',
           },
         ];
 

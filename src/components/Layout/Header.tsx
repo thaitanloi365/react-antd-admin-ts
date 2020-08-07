@@ -1,23 +1,33 @@
 import React, { PureComponent, Fragment } from 'react';
-import PropTypes from 'prop-types';
 import { Menu, Layout, Avatar, Popover, Badge, List } from 'antd';
+import { IUser, IMenus } from 'types/app';
 import { Ellipsis } from 'components';
 import { Icon as LegacyIcon } from '@ant-design/compatible';
 import { BellOutlined, RightOutlined } from '@ant-design/icons';
-import { setLocale } from 'utils';
 import moment from 'moment';
 import classnames from 'classnames';
-import config from 'config';
 import styles from './Header.less';
 
 const { SubMenu } = Menu;
 
-class Header extends PureComponent {
-  handleClickMenu = (e) => {
+export interface IHeaderProps {
+  fixed: boolean;
+  user: IUser;
+  menus: IMenus;
+  collapsed: boolean;
+  onSignOut: () => void;
+  onEdit: () => void;
+  notifications: any[];
+  onCollapseChange: (collapsed: boolean) => void;
+  onAllNotificationsRead: () => void;
+}
+
+class Header extends PureComponent<IHeaderProps> {
+  handleClickMenu = (e: any) => {
     e.key === 'SignOut' && this.props.onSignOut();
   };
   render() {
-    const { fixed, avatar, username, collapsed, notifications, onCollapseChange, onAllNotificationsRead } = this.props;
+    const { fixed, user, collapsed, notifications, onCollapseChange, onAllNotificationsRead } = this.props;
 
     const rightContent = [
       <Menu key="user" mode="horizontal" onClick={this.handleClickMenu}>
@@ -25,8 +35,8 @@ class Header extends PureComponent {
           title={
             <Fragment>
               <span style={{ color: '#999', marginRight: 4 }}>Hi,</span>
-              <span>{username}</span>
-              <Avatar style={{ marginLeft: 8 }} src={avatar} />
+              <span>{user?.name}</span>
+              <Avatar style={{ marginLeft: 8 }} src={user?.avatar} />
             </Fragment>
           }
         >
@@ -34,31 +44,6 @@ class Header extends PureComponent {
         </SubMenu>
       </Menu>,
     ];
-
-    if (config.i18n) {
-      const { languages } = config.i18n;
-      const currentLanguage = languages.find((item) => item.key === i18n._language);
-
-      rightContent.unshift(
-        <Menu
-          key="language"
-          selectedKeys={[currentLanguage.key]}
-          onClick={(data) => {
-            setLocale(data.key);
-          }}
-          mode="horizontal"
-        >
-          <SubMenu title={<Avatar size="small" src={currentLanguage.flag} />}>
-            {languages.map((item) => (
-              <Menu.Item key={item.key}>
-                <Avatar size="small" style={{ marginRight: 8 }} src={item.flag} />
-                {item.title}
-              </Menu.Item>
-            ))}
-          </SubMenu>
-        </Menu>
-      );
-    }
 
     rightContent.unshift(
       <Popover
@@ -75,7 +60,7 @@ class Header extends PureComponent {
               locale={{
                 emptyText: 'You have viewed all notifications.',
               }}
-              renderItem={(item) => (
+              renderItem={(item: any) => (
                 <List.Item className={styles.notificationItem}>
                   <List.Item.Meta
                     title={
@@ -125,16 +110,5 @@ class Header extends PureComponent {
     );
   }
 }
-
-Header.propTypes = {
-  fixed: PropTypes.bool,
-  user: PropTypes.object,
-  menus: PropTypes.array,
-  collapsed: PropTypes.bool,
-  onSignOut: PropTypes.func,
-  notifications: PropTypes.array,
-  onCollapseChange: PropTypes.func,
-  onAllNotificationsRead: PropTypes.func,
-};
 
 export default Header;

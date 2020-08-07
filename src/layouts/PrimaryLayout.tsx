@@ -1,28 +1,29 @@
 import React, { PureComponent, Fragment } from 'react';
-import { withRouter } from 'umi';
-import { connect } from 'umi';
+import { withRouter, connect } from 'umi';
 import { MyLayout, GlobalFooter } from 'components';
 import { BackTop, Layout, Drawer } from 'antd';
 import { enquireScreen, unenquireScreen } from 'enquire-js';
-import { getLocale } from 'utils';
 import Error from '../pages/404';
 import styles from './PrimaryLayout.less';
 import store from 'store';
 import config from 'utils/config';
-import { pathToRegexp } from 'path-to-regexp';
+import constant from 'utils/constant';
+import { IConnectState } from 'types';
+import { IHeaderProps } from 'components/Layout/Header';
+import { ISiderProps } from 'components/Layout/Sider';
 
 const { Content } = Layout;
 const { Header, Bread, Sider } = MyLayout;
-
 @withRouter
-@connect(({ app, loading }) => ({ app, loading }))
-class PrimaryLayout extends PureComponent {
+@connect(({ app, loading }: IConnectState) => ({ app, loading }))
+class PrimaryLayout extends PureComponent<IConnectState> {
   state = {
     isMobile: false,
   };
+  enquireHandler: any;
 
   componentDidMount() {
-    this.enquireHandler = enquireScreen((mobile) => {
+    this.enquireHandler = enquireScreen((mobile: boolean) => {
       const { isMobile } = this.state;
       if (isMobile !== mobile) {
         this.setState({
@@ -36,52 +37,40 @@ class PrimaryLayout extends PureComponent {
     unenquireScreen(this.enquireHandler);
   }
 
-  onCollapseChange = (collapsed) => {
+  onCollapseChange = (collapsed: boolean) => {
     this.props.dispatch({
       type: 'app/handleCollapseChange',
       payload: collapsed,
     });
   };
 
+  renderFooterInfo() {
+    return (
+      <div className={styles.info}>
+        <span>{config.copyright}</span>
+      </div>
+    );
+  }
+
   render() {
-    const { app, location, dispatch, children } = this.props;
-    const { theme, collapsed, notifications } = app;
+    const { app, dispatch, children } = this.props;
+    const { theme, collapsed, notifications } = app || {};
     const user = store.get('user') || {};
-    const permissions = store.get('permissions') || {};
-    const routeList = store.get('routeList') || [];
+    const token = store.get('token') || '';
     const { isMobile } = this.state;
     const { onCollapseChange } = this;
 
-    // Localized route name.
-
-    const lang = getLocale();
-    const newRouteList =
-      lang !== 'en'
-        ? routeList.map((item) => {
-            const { name, ...other } = item;
-            return {
-              ...other,
-              name: (item[lang] || {}).name || name,
-            };
-          })
-        : routeList;
-
-    // Find a route that matches the pathname.
-    const currentRoute = newRouteList.find((_) => _.route && pathToRegexp(_.route).exec(location.pathname));
-
     // Query whether you have permission to enter this page
-    const hasPermission = currentRoute ? permissions.visit.includes(currentRoute.id) : false;
+    const hasPermission = token !== '';
 
     // MenuParentId is equal to -1 is not a available menu.
-    const menus = newRouteList.filter((_) => _.menuParentId !== '-1');
+    const menus = constant.menus.filter((item) => item.menuParentId !== '-1');
 
-    const headerProps = {
+    const headerProps: IHeaderProps = {
       menus,
       collapsed,
       notifications,
       onCollapseChange,
-      avatar: user.avatar,
-      username: user.username,
       fixed: config.fixedHeader,
       onAllNotificationsRead() {
         dispatch({ type: 'app/allNotificationsRead' });
@@ -89,15 +78,19 @@ class PrimaryLayout extends PureComponent {
       onSignOut() {
         dispatch({ type: 'app/signOut' });
       },
+      onEdit() {
+        dispatch({ type: 'app/signOut' });
+      },
+      user,
     };
 
-    const siderProps = {
+    const siderProps: ISiderProps = {
       theme,
       menus,
       isMobile,
       collapsed,
       onCollapseChange,
-      onThemeChange(theme) {
+      onThemeChange(theme: 'light' | 'dark') {
         dispatch({
           type: 'app/handleThemeChange',
           payload: theme,
@@ -110,7 +103,7 @@ class PrimaryLayout extends PureComponent {
         <Layout>
           {isMobile ? (
             <Drawer
-              maskClosable
+              maskClosable={true}
               closable={false}
               onClose={onCollapseChange.bind(this, !collapsed)}
               visible={!collapsed}
@@ -129,11 +122,14 @@ class PrimaryLayout extends PureComponent {
           <div className={styles.container} style={{ paddingTop: config.fixedHeader ? 72 : 0 }} id="primaryLayout">
             <Header {...headerProps} />
             <Content className={styles.content}>
-              <Bread routeList={newRouteList} />
+              <Bread routeList={constant.menus} />
               {hasPermission ? children : <Error />}
             </Content>
-            <BackTop className={styles.backTop} target={() => document.querySelector('#primaryLayout')} />
-            <GlobalFooter className={styles.footer} copyright={config.copyright} />
+            <BackTop
+              className={styles.backTop}
+              target={() => document.querySelector<HTMLHtmlElement>('#primaryLayout')}
+            />
+            <GlobalFooter className={styles.footer} copyright={this.renderFooterInfo()} />
           </div>
         </Layout>
       </Fragment>
